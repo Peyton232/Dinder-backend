@@ -1,4 +1,4 @@
-package db
+package database
 
 import (
 	"context"
@@ -16,7 +16,7 @@ type DB struct {
 
 func Connect() *DB {
 
-	//if time permits actually pull this info from env file
+	// if time permits actually pull this info from env file
 	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb+srv://admin:zV4eLIazskx5dbQm@cluster0.ubxcq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"))
 	if err != nil {
 		log.Print(err)

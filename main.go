@@ -3,9 +3,17 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/henlegay/diner-api/database"
 )
 
+var DB *database.DB
+
 func main() {
+	// connect to database
+	DB = database.Connect()
+
+	// setup endpoints
 	http.HandleFunc("/alive", Alive)
 	http.HandleFunc("/create", CreateRoom)
 	http.HandleFunc("/join", JoinRoom)
@@ -13,6 +21,8 @@ func main() {
 	http.HandleFunc("/get", GetRooms)
 	http.HandleFunc("/swipeRight", SwipeRight)
 	http.HandleFunc("/swipeLeft", SwipeLeft)
+
+	// start server
 	http.ListenAndServe(":42069", nil)
 }
 
