@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"log"
+	"math/rand"
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -31,4 +33,19 @@ func Connect() *DB {
 		rooms:  client.Database("killabytez").Collection("rooms"),
 		client: client,
 	}
+}
+
+func (DB *DB) CreateRoom(user string, location string) (string, error) {
+
+	//generate random 4 digit code
+	code := strconv.Itoa(rangeIn(1000, 9999))
+
+	// create room in db
+
+	return code, nil
+}
+
+// helper funcs
+func rangeIn(low, hi int) int {
+	return low + rand.Intn(hi-low)
 }

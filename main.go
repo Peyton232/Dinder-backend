@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -42,7 +43,7 @@ func JoinRoom(response http.ResponseWriter, request *http.Request) {
 	// get 'user' query param
 	// get 'room' query param
 
-	// call join room db function
+	// call join room db function, params are user and room
 
 	// return list of restauraunts
 }
@@ -51,7 +52,55 @@ func JoinRoom(response http.ResponseWriter, request *http.Request) {
 // wat need: location, user
 // return: list of restaurants, room ID
 func CreateRoom(response http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
+	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:]) // remove this line
+
+	//set response type to json (only do if you need to return a json object)
+	response.Header().Set("Content-Type", "application/json")
+
+	// get 'user' query param and make sure it's provided
+	user := request.URL.Query().Get("user")
+
+	if user == "" {
+		// write error code
+		response.WriteHeader(http.StatusBadRequest)
+		// write error in response
+		json.NewEncoder(response).Encode(struct {
+			Error string `json:"error"`
+		}{
+			Error: "no user provided",
+		})
+		return
+	}
+
+	// get 'location' query param
+	location := request.URL.Query().Get("location")
+
+	// call create room db function, params are user and location
+	roomID, err := DB.CreateRoom(user, location)
+	//if there was error report it
+	if err != nil {
+		// write error code
+		response.WriteHeader(http.StatusInternalServerError)
+		// write error in response
+		json.NewEncoder(response).Encode(struct {
+			Error string `json:"error"`
+		}{
+			Error: err.Error(),
+		})
+		return
+	}
+
+	// send back a successful created code
+	response.WriteHeader(http.StatusCreated)
+
+	// write list of restauraunts and room ID into response
+	json.NewEncoder(response).Encode(struct {
+		Restauraunts []string `json:"restauraunts"`
+		RoomID       string   `json:"roomID"`
+	}{
+		Restauraunts: restaurant[:],
+		RoomID:       roomID,
+	})
 }
 
 // wat do: list all current rooms
@@ -59,6 +108,9 @@ func CreateRoom(response http.ResponseWriter, request *http.Request) {
 // return: list of all rooms
 func GetRooms(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
+
+	// call get all rooms db function
+	// reurn result
 }
 
 // wat do: remove user from room
@@ -66,6 +118,11 @@ func GetRooms(response http.ResponseWriter, request *http.Request) {
 // return: nothing
 func LeaveRoom(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
+
+	// get 'user' query param
+	// get 'room' query param
+
+	// call remove user db function, params are user and room
 }
 
 // wat do: increment vote for selected restaurant
@@ -73,6 +130,12 @@ func LeaveRoom(response http.ResponseWriter, request *http.Request) {
 // return: true or false for found
 func SwipeRight(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
+
+	// get 'restaurant' query param
+
+	// call db add vote function
+
+	// call helper function to determine if result is found yet
 }
 
 // wat do: nothing
@@ -80,4 +143,12 @@ func SwipeRight(response http.ResponseWriter, request *http.Request) {
 // return: true or false for found
 func SwipeLeft(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
+
+	// call helper function to determine if result is found yet
+}
+
+// async wait function (Peyton will do this )
+func FinalCountdown(response http.ResponseWriter, request *http.Request) {
+	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
+	// hold person here until ready to return with result
 }
