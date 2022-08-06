@@ -12,11 +12,11 @@ func main() {
 	http.HandleFunc("/Get", GetRooms)
 	http.HandleFunc("/Leave", LeaveRoom)
 	http.HandleFunc("/SwipeRight", SwipeRight)
-  http.HandleFunc("/SwipeLeft", SwipeLeft)
+  	http.HandleFunc("/SwipeLeft", SwipeLeft)
 	http.ListenAndServe(":42069", nil)
 }
 
-func HelloServer(w http.ResponseWriter, r *http.Request) {
+func Alive(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, %s!", r.URL.Path[1:])
 }
 
@@ -37,7 +37,7 @@ func CreateRoom(w http.ResponseWriter, r *http.Request) {
 //wat do: list all current rooms
 //wat need: nothing
 //return: list of all rooms
-func GetRoom(w http.ResponseWriter, r *http.Request) {
+func GetRooms(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, %s!", r.URL.Path[1:])
 }
 
