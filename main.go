@@ -8,6 +8,7 @@ import (
 )
 
 var DB *database.DB
+var restaurant [12]string = [12]string{"Mcdonalds", "Chick-fil-a", "Taco Bell", "Olive Garden", "Chilis", "Braums", "Mooyah", "Canes", "5 guys", "in-n-out", "chiptole", "Crooked Crust"}
 
 func main() {
 	// connect to database
@@ -41,6 +42,9 @@ func JoinRoom(response http.ResponseWriter, request *http.Request) {
 	// get 'user' query param
 	// get 'room' query param
 
+	// call join room db function
+
+	// return list of restauraunts
 }
 
 // wat do: creates a room
