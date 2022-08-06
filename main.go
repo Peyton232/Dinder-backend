@@ -7,12 +7,12 @@ import (
 
 func main() {
 	http.HandleFunc("/alive", Alive)
-	http.HandleFunc("/Join", JoinRoom)
-	http.HandleFunc("/Create", CreateRoom)
-	http.HandleFunc("/Get", GetRooms)
-	http.HandleFunc("/Leave", LeaveRoom)
-	http.HandleFunc("/SwipeRight", SwipeRight)
-	http.HandleFunc("/SwipeLeft", SwipeLeft)
+	http.HandleFunc("/create", CreateRoom)
+	http.HandleFunc("/join", JoinRoom)
+	http.HandleFunc("/leave", LeaveRoom)
+	http.HandleFunc("/get", GetRooms)
+	http.HandleFunc("/swipeRight", SwipeRight)
+	http.HandleFunc("/swipeLeft", SwipeLeft)
 	http.ListenAndServe(":42069", nil)
 }
 
@@ -26,7 +26,11 @@ func Alive(response http.ResponseWriter, request *http.Request) {
 // wat need: user id, room id
 // return: list of restaurants
 func JoinRoom(response http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
+	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:]) // remove this line
+
+	// get 'user' query param
+	// get 'room' query param
+
 }
 
 // wat do: creates a room
