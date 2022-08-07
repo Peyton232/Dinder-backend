@@ -61,8 +61,9 @@ func JoinRoom(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	// write error code
-	response.WriteHeader(http.StatusInternalServerError)
+	// send back a successful OK code
+	response.WriteHeader(http.StatusOK)
+
 	// write list of restauraunts into response
 	json.NewEncoder(response).Encode(struct {
 		Restauraunts []string `json:"restauraunts"`
@@ -124,6 +125,7 @@ func CreateRoom(response http.ResponseWriter, request *http.Request) {
 		Restauraunts: restaurant[:],
 		RoomID:       roomID,
 	})
+	//TODO: refactor so we have a model to return so this is cleaned up a bit, instead of being anonamyous
 }
 
 // wat do: list all current rooms
@@ -174,4 +176,32 @@ func SwipeLeft(response http.ResponseWriter, request *http.Request) {
 func FinalCountdown(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
 	// hold person here until ready to return with result
+
+	// get 'room' query param
+	room := request.URL.Query().Get("room")
+
+	winner, err := DB.FinalCountdown(room)
+	//if there was error report it
+	if err != nil {
+		// write error code
+		response.WriteHeader(http.StatusInternalServerError)
+		// write error in response
+		json.NewEncoder(response).Encode(struct {
+			Error string `json:"error"`
+		}{
+			Error: err.Error(),
+		})
+		return
+	}
+
+	// send back a successful OK code
+	response.WriteHeader(http.StatusOK)
+
+	// write list of restauraunts and room ID into response
+	json.NewEncoder(response).Encode(struct {
+		Winner string `json:"winner"`
+	}{
+		Winner: winner,
+	})
+	//TODO: refactor so we have a model to return so this is cleaned up a bit, instead of being anonamyous
 }

@@ -98,6 +98,34 @@ func (db DB) JoinRoom(user string, room string) error {
 	return nil
 }
 
+func (db DB) FinalCountdown(room string) (string, error) {
+	// select collection
+	collection := db.rooms
+
+	// setup context
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+
+	// check if room exists
+	roomModel := model.Room{}
+	filter := bson.M{"roomid": room}
+	res := collection.FindOne(ctx, filter).Decode(&roomModel)
+
+	// if no result
+	if res == mongo.ErrNoDocuments {
+		return "", res
+	}
+
+	// loop until room has completed
+	for {
+		collection.FindOne(ctx, filter).Decode(&roomModel)
+		if roomModel.Found {
+			return roomModel.Winner, nil
+		}
+		time.Sleep(10 * time.Second)
+	}
+}
+
 // ---------------------------------------------------------- helper funcs ----------------------------------------------------------
 func rangeIn(low, hi int) int {
 	return low + rand.Intn(hi-low)

@@ -6,4 +6,6 @@ type Room struct {
 	Location     string   `json:"location"`
 	Restauraunts []string `json:"restauraunts"`
 	Votes        []int    `json:"votes"`
+	Found        bool     `json:"found"`
+	Winner       string   `json:"winner"`
 }
