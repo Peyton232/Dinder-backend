@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/henlegay/diner-api/database"
+	model "github.com/henlegay/diner-api/models"
 )
 
 var DB *database.DB
@@ -23,7 +24,7 @@ func main() {
 	http.HandleFunc("/get", GetRooms)
 	http.HandleFunc("/swipeRight", SwipeRight)
 	http.HandleFunc("/swipeLeft", SwipeLeft)
-
+	http.HandleFunc("/rooms", GetRooms)
 	// start server
 	http.ListenAndServe(":42069", nil)
 }
@@ -133,10 +134,16 @@ func CreateRoom(response http.ResponseWriter, request *http.Request) {
 // wat need: nothing
 // return: list of all rooms
 func GetRooms(response http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
 
 	// call get all rooms db function
+	allRooms := DB.GetRooms()
 	// reurn result
+	json.NewEncoder(response).Encode(struct {
+		Rooms []model.Room `json:"rooms"`
+	}{
+		Rooms: allRooms[:],
+	})
+
 }
 
 // wat do: remove user from room

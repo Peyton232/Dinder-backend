@@ -199,6 +199,35 @@ func (db DB) Vote(room string, restaurant string) (string, error) {
 	return "", nil
 }
 
+func (db DB) GetRooms() []model.Room {
+	// select collection
+	collection := db.rooms
+
+	// setup context
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{}
+	cur, err := collection.Find(ctx, filter)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
+	var roomList []model.Room
+	for cur.Next(ctx) {
+		var temp model.Room
+		err := cur.Decode(&temp)
+		if err != nil {
+			log.Print(err)
+			log.Print("\nunable to read room model in database package\n")
+			return nil
+		}
+		roomList = append(roomList, temp)
+
+	}
+	return roomList
+}
+
 // ---------------------------------------------------------- helper funcs ----------------------------------------------------------
 func rangeIn(low, hi int) int {
 	return low + rand.Intn(hi-low)
