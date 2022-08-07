@@ -106,6 +106,7 @@ func (db DB) JoinRoom(user string, room string) error {
 }
 
 func (db DB) LeaveRoom(user string, room string) error {
+
 	// select collection
 	collection := db.rooms
 
@@ -147,6 +148,91 @@ func (db DB) FinalCountdown(room string) (string, error) {
 		}
 		time.Sleep(10 * time.Second)
 	}
+}
+
+func (db DB) SwipeLeft(room string) (string, error) {
+	// select collection
+	collection := db.rooms
+
+	// setup context
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	roomModel := model.Room{}
+	filter := bson.M{"roomid": room}
+	err := collection.FindOne(ctx, filter).Decode(&roomModel)
+	if err == mongo.ErrNoDocuments {
+		return "", err
+	}
+
+	if roomModel.Found == true {
+		return roomModel.Winner, nil
+	}
+	return "", nil
+}
+func (db DB) Vote(room string, restaurant string) (string, error) {
+
+	// select collection
+	collection := db.rooms
+
+	// setup context
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// check if room exists
+	roomModel := model.Room{}
+	filter := bson.M{"roomid": room}
+	res := collection.FindOne(ctx, filter).Decode(&roomModel)
+	// if no result
+	if res == mongo.ErrNoDocuments {
+		return "", res
+	}
+
+	for i := 0; i < len(roomModel.Restauraunts); i++ {
+		if roomModel.Restauraunts[i] == restaurant {
+			roomModel.Votes[i]++
+		}
+		//final winning condition
+		if roomModel.Votes[i] == len(roomModel.Users) {
+			//decision reached, return restaurant name
+			//set winner to restaurant name
+			roomModel.Winner = roomModel.Restauraunts[i]
+			//set found to true
+			roomModel.Found = true
+			collection.FindOneAndUpdate(ctx, filter, roomModel)
+			return restaurant, nil
+		}
+	}
+	return "", nil
+}
+
+func (db DB) GetRooms() []model.Room {
+	// select collection
+	collection := db.rooms
+
+	// setup context
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{}
+	cur, err := collection.Find(ctx, filter)
+	if err != nil {
+		log.Print(err)
+		return nil
+	}
+	var roomList []model.Room
+	for cur.Next(ctx) {
+		var temp model.Room
+		err := cur.Decode(&temp)
+		if err != nil {
+			log.Print(err)
+			log.Print("\nunable to read room model in database package\n")
+			return nil
+		}
+		roomList = append(roomList, temp)
+
+	}
+	return roomList
 }
 
 // ---------------------------------------------------------- helper funcs ----------------------------------------------------------
