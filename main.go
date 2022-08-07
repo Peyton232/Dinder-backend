@@ -156,7 +156,6 @@ func LeaveRoom(response http.ResponseWriter, request *http.Request) {
 // wat need: restaurant and roomid
 // return: true or false for found
 func SwipeRight(response http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
 
 	// get 'restaurant' query param
 	restaurant := request.URL.Query().Get("restaurant")
@@ -197,12 +196,46 @@ func SwipeRight(response http.ResponseWriter, request *http.Request) {
 }
 
 // wat do: nothing
-// wat need:
+// wat need: room id
 // return: true or false for found
 func SwipeLeft(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
 
-	// call helper function to determine if result is found yet
+	//get room query parameter
+	room := request.URL.Query().Get("room")
+	winner, err := DB.SwipeLeft(room)
+
+	// return error ir error
+	if err != nil {
+		// write error code
+		response.WriteHeader(http.StatusInternalServerError)
+		// write error in response
+		json.NewEncoder(response).Encode(struct {
+			Error string `json:"error"`
+		}{
+			Error: err.Error(),
+		})
+		return
+	}
+	// return found and winner
+	if winner != "" {
+		json.NewEncoder(response).Encode(struct {
+			WRestaurant string `json:"winning_restaurant"`
+			Found       bool   `json:"found"`
+		}{
+			WRestaurant: winner,
+			Found:       true,
+		})
+	}
+
+	// if not find wiener
+	json.NewEncoder(response).Encode(struct {
+		WRestaurant string `json:"winning_restaurant"`
+		Found       bool   `json:"found"`
+	}{
+		WRestaurant: "",
+		Found:       false,
+	})
 }
 
 // async wait function (Peyton will do this )
@@ -236,5 +269,6 @@ func FinalCountdown(response http.ResponseWriter, request *http.Request) {
 	}{
 		Winner: winner,
 	})
+
 	//TODO: refactor so we have a model to return so this is cleaned up a bit, instead of being anonamyous
 }

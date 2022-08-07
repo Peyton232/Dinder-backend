@@ -99,6 +99,7 @@ func (db DB) JoinRoom(user string, room string) error {
 }
 
 func (db DB) LeaveRoom(user string, room string) error {
+
 	// select collection
 	collection := db.rooms
 
@@ -142,6 +143,26 @@ func (db DB) FinalCountdown(room string) (string, error) {
 	}
 }
 
+func (db DB) SwipeLeft(room string) (string, error) {
+	// select collection
+	collection := db.rooms
+
+	// setup context
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	roomModel := model.Room{}
+	filter := bson.M{"roomid": room}
+	err := collection.FindOne(ctx, filter).Decode(&roomModel)
+	if err == mongo.ErrNoDocuments {
+		return "", err
+	}
+
+	if roomModel.Found == true {
+		return roomModel.Winner, nil
+	}
+	return "", nil
+}
 func (db DB) Vote(room string, restaurant string) (string, error) {
 
 	// select collection
