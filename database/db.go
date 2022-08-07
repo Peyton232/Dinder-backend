@@ -13,6 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var restaurant []string = []string{"Mcdonalds", "Chick-fil-a", "Taco Bell", "Olive Garden", "Chilis", "Braums", "Mooyah", "Canes", "5 guys", "in-n-out", "chiptole", "Crooked Crust"}
+
 type DB struct {
 	client *mongo.Client
 	rooms  *mongo.Collection
@@ -55,10 +57,15 @@ func (db DB) CreateRoom(user string, location string) (string, error) {
 	code := strconv.Itoa(rangeIn(1000, 9999))
 
 	// put data into model
+	initalVotes := []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	roomData := &model.Room{
-		Users:    []string{user},
-		RoomID:   code,
-		Location: location,
+		Users:        []string{user},
+		RoomID:       code,
+		Location:     location,
+		Found:        false,
+		Restauraunts: restaurant,
+		Votes:        initalVotes,
+		Winner:       "",
 	}
 
 	// create room in db
