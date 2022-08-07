@@ -153,16 +153,47 @@ func LeaveRoom(response http.ResponseWriter, request *http.Request) {
 }
 
 // wat do: increment vote for selected restaurant
-// wat need: restaurant id
+// wat need: restaurant and roomid
 // return: true or false for found
 func SwipeRight(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
 
 	// get 'restaurant' query param
-
+	restaurant := request.URL.Query().Get("restaurant")
+	// get 'restaurant' query param
+	room := request.URL.Query().Get("room")
 	// call db add vote function
-
+	winningRestaurant, err := DB.Vote(room, restaurant)
+	if err != nil {
+		// write error code
+		response.WriteHeader(http.StatusInternalServerError)
+		// write error in response
+		json.NewEncoder(response).Encode(struct {
+			Error string `json:"error"`
+		}{
+			Error: err.Error(),
+		})
+		return
+	}
 	// call helper function to determine if result is found yet
+	if winningRestaurant != "" {
+		json.NewEncoder(response).Encode(struct {
+			WRestaurant string `json:"winning_restaurant"`
+			Found       bool   `json:"found"`
+		}{
+			WRestaurant: winningRestaurant,
+			Found:       true,
+		})
+	}
+
+	// if not find wiener
+	json.NewEncoder(response).Encode(struct {
+		WRestaurant string `json:"winning_restaurant"`
+		Found       bool   `json:"found"`
+	}{
+		WRestaurant: "",
+		Found:       false,
+	})
 }
 
 // wat do: nothing

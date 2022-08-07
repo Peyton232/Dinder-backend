@@ -142,6 +142,42 @@ func (db DB) FinalCountdown(room string) (string, error) {
 	}
 }
 
+func (db DB) Vote(room string, restaurant string) (string, error) {
+
+	// select collection
+	collection := db.rooms
+
+	// setup context
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// check if room exists
+	roomModel := model.Room{}
+	filter := bson.M{"roomid": room}
+	res := collection.FindOne(ctx, filter).Decode(&roomModel)
+	// if no result
+	if res == mongo.ErrNoDocuments {
+		return "", res
+	}
+
+	for i := 0; i < len(roomModel.Restauraunts); i++ {
+		if roomModel.Restauraunts[i] == restaurant {
+			roomModel.Votes[i]++
+		}
+		//final winning condition
+		if roomModel.Votes[i] == len(roomModel.Users) {
+			//decision reached, return restaurant name
+			//set winner to restaurant name
+			roomModel.Winner = roomModel.Restauraunts[i]
+			//set found to true
+			roomModel.Found = true
+			collection.FindOneAndUpdate(ctx, filter, roomModel)
+			return restaurant, nil
+		}
+	}
+	return "", nil
+}
+
 // ---------------------------------------------------------- helper funcs ----------------------------------------------------------
 func rangeIn(low, hi int) int {
 	return low + rand.Intn(hi-low)
