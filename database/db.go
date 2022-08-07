@@ -47,12 +47,12 @@ func (db DB) CreateRoom(user string, location string) (string, error) {
 	//select collection
 	collection := db.rooms
 
-	//generate random 4 digit code
-	code := strconv.Itoa(rangeIn(1000, 9999))
-
 	// setup context
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
+	//generate random 4 digit code
+	code := strconv.Itoa(rangeIn(1000, 9999))
 
 	// put data into model
 	roomData := &model.Room{
@@ -93,6 +93,22 @@ func (db DB) JoinRoom(user string, room string) error {
 
 	// add user to room
 	update := bson.M{"$addToSet": bson.M{"users": user}}
+	collection.FindOneAndUpdate(ctx, filter, update)
+
+	return nil
+}
+
+func (db DB) LeaveRoom(user string, room string) error {
+	// select collection
+	collection := db.rooms
+
+	// setup context
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// remove user from room
+	filter := bson.M{"roomid": room}
+	update := bson.M{"$pull": bson.M{"users": user}}
 	collection.FindOneAndUpdate(ctx, filter, update)
 
 	return nil

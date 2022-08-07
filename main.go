@@ -48,6 +48,7 @@ func JoinRoom(response http.ResponseWriter, request *http.Request) {
 
 	// call join room db function, params are user and room
 	err := DB.JoinRoom(user, room)
+
 	//if there was error report it
 	if err != nil {
 		// write error code
@@ -142,12 +143,13 @@ func GetRooms(response http.ResponseWriter, request *http.Request) {
 // wat need: user id, room id they're leaving from
 // return: nothing
 func LeaveRoom(response http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:])
-
 	// get 'user' query param
+	user := request.URL.Query().Get("user")
 	// get 'room' query param
+	room := request.URL.Query().Get("room")
 
 	// call remove user db function, params are user and room
+	DB.LeaveRoom(user, room)
 }
 
 // wat do: increment vote for selected restaurant
