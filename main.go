@@ -38,23 +38,46 @@ func Alive(response http.ResponseWriter, request *http.Request) {
 // wat need: user id, room id
 // return: list of restaurants
 func JoinRoom(response http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:]) // remove this line
+	//set response type to json (only do if you need to return stuff)
+	response.Header().Set("Content-Type", "application/json")
 
 	// get 'user' query param
+	user := request.URL.Query().Get("user")
 	// get 'room' query param
+	room := request.URL.Query().Get("room")
 
 	// call join room db function, params are user and room
+	err := DB.JoinRoom(user, room)
+	//if there was error report it
+	if err != nil {
+		// write error code
+		response.WriteHeader(http.StatusInternalServerError)
+		// write error in response
+		json.NewEncoder(response).Encode(struct {
+			Error string `json:"error"`
+		}{
+			Error: err.Error(),
+		})
+		return
+	}
 
-	// return list of restauraunts
+	// write error code
+	response.WriteHeader(http.StatusInternalServerError)
+	// write list of restauraunts into response
+	json.NewEncoder(response).Encode(struct {
+		Restauraunts []string `json:"restauraunts"`
+	}{
+		Restauraunts: restaurant[:],
+	})
+	//TODO: refactor so we have a model to return so this is cleaned up a bit, instead of being anonamyous
+
 }
 
 // wat do: creates a room
 // wat need: location, user
 // return: list of restaurants, room ID
 func CreateRoom(response http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(response, "Hello, %s!", request.URL.Path[1:]) // remove this line
-
-	//set response type to json (only do if you need to return a json object)
+	//set response type to json (only do if you need to return stuff)
 	response.Header().Set("Content-Type", "application/json")
 
 	// get 'user' query param and make sure it's provided
